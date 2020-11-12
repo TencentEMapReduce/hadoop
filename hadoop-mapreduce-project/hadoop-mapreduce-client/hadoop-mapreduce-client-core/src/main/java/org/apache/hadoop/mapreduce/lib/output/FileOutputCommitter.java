@@ -20,6 +20,9 @@ package org.apache.hadoop.mapreduce.lib.output;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -384,12 +387,47 @@ public class FileOutputCommitter extends OutputCommitter {
   @VisibleForTesting
   protected void commitJobInternal(JobContext context) throws IOException {
     if (hasOutputPath()) {
-      Path finalOutput = getOutputPath();
-      FileSystem fs = finalOutput.getFileSystem(context.getConfiguration());
+      final Path finalOutput = getOutputPath();
+      final FileSystem fs = finalOutput.getFileSystem(context.getConfiguration());
 
       if (algorithmVersion == 1) {
-        for (FileStatus stat: getAllCommittedTaskPaths(context)) {
-          mergePaths(fs, stat, finalOutput);
+        FileStatus[]  fileStatuses = getAllCommittedTaskPaths(context);
+
+//        for (FileStatus stat: fileStatuses) {
+//          LOG.warn("committed task path # " + stat.getPath().getName());
+//          mergePaths(fs, stat, finalOutput);
+//        }
+        LOG.warn("committed task path # " + fileStatuses.length);
+        boolean result = true;
+        final List<Future<Boolean>> futures = new LinkedList<>();
+        final ExecutorService pool = Executors.newFixedThreadPool(25);
+        try {
+          for (final FileStatus status : fileStatuses) {
+            if (null == pool) {
+              result &= mergePaths(fs, status, finalOutput);
+            } else {
+              futures.add(pool.submit(new Callable<Boolean>() {
+                @Override
+                public Boolean call() throws Exception {
+//                  LOG.warn("committed task path # " + status.getPath().getName());
+                  return mergePaths(fs, status, finalOutput);
+                }
+              }));
+            }
+          }
+        } finally {
+          if (null != pool) {
+            pool.shutdown();
+            for (Future<Boolean> future : futures) {
+              try {
+                result &= future.get();
+              } catch (InterruptedException | ExecutionException e) {
+                LOG.error("Failed to delete: ",e);
+                pool.shutdownNow();
+                throw new IOException(e);
+              }
+            }
+          }
         }
       }
 
@@ -439,7 +477,7 @@ public class FileOutputCommitter extends OutputCommitter {
    * @param to the path data is going to.
    * @throws IOException on any error
    */
-  private void mergePaths(FileSystem fs, final FileStatus from,
+  private boolean mergePaths(FileSystem fs, final FileStatus from,
       final Path to) throws IOException {
     if (LOG.isDebugEnabled()) {
       LOG.debug("Merging data from " + from + " to " + to);
@@ -479,6 +517,7 @@ public class FileOutputCommitter extends OutputCommitter {
         renameOrMerge(fs, from, to);
       }
     }
+    return true;
   }
 
   private void renameOrMerge(FileSystem fs, FileStatus from, Path to)

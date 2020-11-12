@@ -67,9 +67,12 @@ public class FairOrderingPolicy<S extends SchedulableEntity> extends AbstractCom
   private double getMagnitude(SchedulableEntity r) {
     double mag = r.getSchedulingResourceUsage().getCachedUsed(
       CommonNodeLabelsManager.ANY).getMemorySize();
-    if (sizeBasedWeight) {
+    if (sizeBasedWeight&& mag != 0) {
       double weight = Math.log1p(r.getSchedulingResourceUsage().getCachedDemand(
         CommonNodeLabelsManager.ANY).getMemorySize()) / Math.log(2);
+      // "weight" captures both used and demanding resources, so it could
+      // be zero only when "mag" (or used resource) is zero, in which case
+      // this branch wouldn't be reached
       mag = mag / weight;
     }
     return mag;
