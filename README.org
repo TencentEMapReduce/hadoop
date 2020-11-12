@@ -15,4 +15,6 @@
    git checkout rel/release-2.8.5
    #创建本地分支
    git checkout -b  emr-2.8.5
+   #推送本地分支到远程
+   git push origin emr-2.8.5:emr-2.8.5
  #+END_SRC
