@@ -1,0 +1,18 @@
+* 设置同步仓库地址
+
+#+BEGIN_SRC shell
+  git remote add origin-pull https://github.com/apache/hadoop.git
+  #更新社区仓库
+  git fetch origin-pull
+  #合并
+  git merge origin-pull/trunk
+#+END_SRC
+
+* 设置EMR源码分支
+ 以2.8.5为例
+
+ #+BEGIN_SRC shell
+   git checkout rel/release-2.8.5
+   #创建本地分支
+   git checkout -b  emr-2.8.5
+ #+END_SRC
