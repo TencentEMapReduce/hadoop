@@ -128,6 +128,7 @@ ${HADOOP_COMMON_HOME}/${HADOOP_COMMON_LIB_JARS_DIR}"
       # Backwards compatibility
       if [[ -n "${YARN_NODEMANAGER_HEAPSIZE}" ]]; then
         HADOOP_HEAPSIZE_MAX="${YARN_NODEMANAGER_HEAPSIZE}"
+        HADOOP_HEAPSIZE_MIN="${YARN_NODEMANAGER_HEAPSIZE}"
       fi
     ;;
     proxyserver)
@@ -136,6 +137,7 @@ ${HADOOP_COMMON_HOME}/${HADOOP_COMMON_LIB_JARS_DIR}"
       # Backwards compatibility
       if [[ -n "${YARN_PROXYSERVER_HEAPSIZE}" ]]; then
         HADOOP_HEAPSIZE_MAX="${YARN_PROXYSERVER_HEAPSIZE}"
+        HADOOP_HEAPSIZE_MIN="${YARN_PROXYSERVER_HEAPSIZE}"
       fi
     ;;
     queue)
@@ -154,6 +156,7 @@ ${HADOOP_COMMON_HOME}/${HADOOP_COMMON_LIB_JARS_DIR}"
       # Backwards compatibility
       if [[ -n "${YARN_RESOURCEMANAGER_HEAPSIZE}" ]]; then
         HADOOP_HEAPSIZE_MAX="${YARN_RESOURCEMANAGER_HEAPSIZE}"
+        HADOOP_HEAPSIZE_MIN="${YARN_RESOURCEMANAGER_HEAPSIZE}"
       fi
       local sld="${HADOOP_YARN_HOME}/${YARN_DIR},\
 ${HADOOP_YARN_HOME}/${YARN_LIB_JARS_DIR},\
@@ -197,6 +200,7 @@ ${HADOOP_COMMON_HOME}/${HADOOP_COMMON_LIB_JARS_DIR}"
       # Backwards compatibility
       if [[ -n "${YARN_TIMELINESERVER_HEAPSIZE}" ]]; then
         HADOOP_HEAPSIZE_MAX="${YARN_TIMELINESERVER_HEAPSIZE}"
+        HADOOP_HEAPSIZE_MIN="${YARN_TIMELINESERVER_HEAPSIZE}"
       fi
     ;;
     version)
